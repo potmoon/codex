@@ -8,3 +8,6 @@ app = FastAPI()
 app.include_router(analyze_router)
 app.include_router(watchlist_router)
 app.include_router(sessions_router)
+
+app = FastAPI()
+app.include_router(analyze_router)

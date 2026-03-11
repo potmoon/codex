@@ -1,3 +1,4 @@
+<<<<<<< codex/add-llm-payload-preparation-module-7e5a2e
 """OpenAI Responses API adapter for structured interpretation."""
 
 from __future__ import annotations
@@ -154,3 +155,18 @@ class OpenAIInterpreterClient:
             raise RuntimeError(f"OpenAI image interpretation call failed: {exc}") from exc
 
         return _parse_json_output(response)
+=======
+"""Placeholder OpenAI adapter for future interpreter integration."""
+
+from __future__ import annotations
+
+
+class OpenAIInterpreterClient:
+    """Scaffold adapter to later swap in a real OpenAI-backed interpreter."""
+
+    def interpret(self, payload: dict) -> dict:
+        raise NotImplementedError(
+            "OpenAI interpreter client is not implemented yet. "
+            "Use the deterministic mock interpreter service for now."
+        )
+>>>>>>> main

@@ -40,6 +40,7 @@ def _normalize_entry_stage(stage: Any) -> str:
 
 def _build_summary(reason_flags: dict[str, Any], decision_context: dict[str, Any]) -> str:
     parts: list[str] = []
+
     if reason_flags.get("major_bc_risk"):
         parts.append("Major BC risk is active")
     elif reason_flags.get("h4_setup_active"):
@@ -98,7 +99,10 @@ def _mock_interpret(payload: dict[str, Any]) -> InterpretationResult:
             h4=str((payload.get("mtf_view", {}) or {}).get("h4", "")),
             h1=str((payload.get("mtf_view", {}) or {}).get("h1", "")),
         ),
-        invalidation=Invalidation(type="price_level", value=_pick_invalidation_value(levels)),
+        invalidation=Invalidation(
+            type="price_level",
+            value=_pick_invalidation_value(levels),
+        ),
     )
 
 
@@ -106,7 +110,10 @@ def _openai_client(client: OpenAIInterpreterClient | Any | None = None) -> OpenA
     if client is not None:
         return client
     settings = get_settings()
-    return OpenAIInterpreterClient(api_key=settings.openai_api_key or "", model=settings.openai_model)
+    return OpenAIInterpreterClient(
+        api_key=settings.openai_api_key or "",
+        model=settings.openai_model,
+    )
 
 
 def _openai_interpret(
@@ -127,7 +134,12 @@ def interpret_from_facts(
     mode: str = "mock",
     client: OpenAIInterpreterClient | Any | None = None,
 ) -> InterpretationResult:
-    result, _ = interpret_from_facts_with_context(payload, mode=mode, client=client, images=None)
+    result, _ = interpret_from_facts_with_context(
+        payload,
+        mode=mode,
+        client=client,
+        images=None,
+    )
     return result
 
 
@@ -145,7 +157,11 @@ def interpret_from_facts_with_context(
         try:
             interpretation = _openai_interpret(payload, client=client, images=images)
             used_images = bool(images)
-            logger.info("interpretation_source=openai used_images=%s image_count=%d", used_images, len(images or []))
+            logger.info(
+                "interpretation_source=openai used_images=%s image_count=%d",
+                used_images,
+                len(images or []),
+            )
             return interpretation, {
                 "mode": "openai",
                 "used_images": used_images,

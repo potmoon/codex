@@ -1,4 +1,4 @@
-"""Schemas for structured interpretation and batch watchlist output."""
+"""Schemas for structured interpretation, watchlist, and session persistence."""
 
 from __future__ import annotations
 
