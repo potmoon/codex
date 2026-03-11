@@ -6,10 +6,10 @@ import { BatchAnalyzeForm } from "@/components/forms/BatchAnalyzeForm";
 import { CsvWatchlistForm } from "@/components/forms/CsvWatchlistForm";
 import { WatchlistTable } from "@/components/tables/WatchlistTable";
 import { Button } from "@/components/ui/Button";
-import type { BatchInterpretResponse } from "@/lib/types";
+import type { BatchInterpretResponse, EnrichAndBatchInterpretResponse } from "@/lib/types";
 
 export default function WatchlistPage() {
-  const [result, setResult] = useState<BatchInterpretResponse | null>(null);
+  const [result, setResult] = useState<(BatchInterpretResponse | EnrichAndBatchInterpretResponse) | null>(null);
   const [mode, setMode] = useState<"json" | "csv">("json");
 
   return (

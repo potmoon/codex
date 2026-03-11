@@ -3,6 +3,8 @@ import type {
   AnalyzeResponse,
   BatchInterpretRequest,
   BatchInterpretResponse,
+  EnrichAndBatchInterpretRequest,
+  EnrichAndBatchInterpretResponse,
   InterpretWithImagesWrapper,
   InterpretWrapper,
   LlmPayload,
@@ -55,6 +57,15 @@ export function batchInterpret(payload: BatchInterpretRequest): Promise<BatchInt
 
 export function buildLlmPayload(payload: AnalyzeRequest): Promise<LlmPayload> {
   return apiFetch("/analyze/llm-payload", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+}
+
+
+export function enrichAndBatchInterpret(payload: EnrichAndBatchInterpretRequest): Promise<EnrichAndBatchInterpretResponse> {
+  return apiFetch("/watchlist/enrich-and-batch-interpret", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),

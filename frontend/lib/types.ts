@@ -133,3 +133,17 @@ export type BatchInterpretResponse = {
 export type CsvTickerRow = {
   ticker: string;
 };
+
+
+export type EnrichAndBatchInterpretRequest = {
+  tickers: string[];
+  limits: {
+    daily: number;
+    h4: number;
+    h1: number;
+  };
+};
+
+export type EnrichAndBatchInterpretResponse = BatchInterpretResponse & {
+  data_source: "mock" | "provider";
+};

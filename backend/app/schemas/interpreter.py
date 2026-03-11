@@ -89,3 +89,18 @@ class BatchInterpretRequestItem(BaseModel):
 
 class BatchInterpretRequest(BaseModel):
     items: list[BatchInterpretRequestItem]
+
+
+class WatchlistLimits(BaseModel):
+    daily: int = 120
+    h4: int = 120
+    h1: int = 120
+
+
+class EnrichAndBatchInterpretRequest(BaseModel):
+    tickers: list[str]
+    limits: WatchlistLimits = WatchlistLimits()
+
+
+class EnrichAndBatchInterpretResponse(BatchInterpretResponse):
+    data_source: Literal["mock", "provider"]

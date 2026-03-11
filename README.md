@@ -1,6 +1,6 @@
 # Codex Backend (Deterministic Facts + Interpreters)
 
-This backend keeps deterministic analysis as the source of truth and adds interpretation and watchlist ranking layers on top.
+This backend keeps deterministic analysis as the source of truth and adds interpretation, market-data enrichment, and watchlist ranking layers.
 
 ## Endpoints
 
@@ -11,83 +11,33 @@ Returns full deterministic analysis facts from candle input.
 Runs deterministic analysis, then returns a compact LLM-ready facts payload.
 
 ### `POST /analyze/interpret`
-Runs the full single-ticker pipeline:
-1. deterministic analyzer (`analyze_ticker`) to build facts
-2. compact payload builder (`build_llm_facts_payload`)
-3. interpreter (`interpret_from_facts`) in either `mock` or `openai` mode
-
-Response shape is stable:
-```json
-{
-  "ticker": "...",
-  "facts": {"...": "full deterministic analysis"},
-  "llm_payload": {"...": "compact deterministic facts"},
-  "interpretation": {"...": "InterpretationResult"}
-}
-```
+Runs single-ticker deterministic analyze → payload → interpret.
 
 ### `POST /analyze/interpret-with-images`
-Image-aware single-ticker interpretation. Uses **multipart/form-data** so candles and images can be uploaded together.
+Image-aware single-ticker interpretation (multipart upload) where images are additive context only.
 
-Required form fields:
-- `ticker` (string)
-- `daily` (JSON array string of candles)
-- `h4` (JSON array string of candles)
-- `h1` (JSON array string of candles)
-- `images` (one or more files)
+### `POST /analyze/batch-interpret`
+Runs analyze/payload/interpret/ranking for explicitly provided candles per ticker.
 
-Accepted image types:
-- `image/png`
-- `image/jpeg`
-- `image/jpg`
+### `POST /watchlist/enrich-and-batch-interpret`
+Fetches candles by ticker (mock/provider), then runs analyze/payload/interpret/ranking.
 
-Validation:
-- at least one image required
-- empty files rejected
-- max image size: 5MB each
-
-Behavior:
-- always computes deterministic facts first
-- `mock` mode: ignores images and uses deterministic interpreter
-- `openai` mode: sends deterministic facts + images to OpenAI adapter
-- OpenAI failures fallback automatically to deterministic mock
-
-Wrapper shape extends `/analyze/interpret` with metadata:
+Request:
 ```json
 {
-  "ticker": "...",
-  "facts": {},
-  "llm_payload": {},
-  "interpretation": {},
-  "interpreter_context": {
-    "mode": "mock|openai|fallback_mock",
-    "used_images": true,
-    "image_count": 2
+  "tickers": ["WIMI", "FSCO", "BATL", "SMX"],
+  "limits": {
+    "daily": 120,
+    "h4": 120,
+    "h1": 120
   }
 }
 ```
 
-### `POST /analyze/batch-interpret`
-Runs the same analyze→payload→interpret pipeline for multiple watchlist items and adds deterministic ranking.
-
-Request shape:
+Response:
 ```json
 {
-  "items": [
-    {
-      "ticker": "WIMI",
-      "daily": [{"timestamp": "...", "open": 0, "high": 0, "low": 0, "close": 0}],
-      "h4": [{"timestamp": "...", "open": 0, "high": 0, "low": 0, "close": 0}],
-      "h1": [{"timestamp": "...", "open": 0, "high": 0, "low": 0, "close": 0}]
-    }
-  ]
-}
-```
-
-Response shape:
-```json
-{
-  "count": 1,
+  "count": 4,
   "items": [
     {
       "ticker": "WIMI",
@@ -96,64 +46,41 @@ Response shape:
       "llm_payload": {},
       "interpretation": {},
       "ranking": {
-        "score": 87.0,
+        "score": 82.0,
         "priority": "high",
         "reason": "Best buy alignment across daily and H4"
       }
     }
   ],
-  "sorted_by": "ranking.score"
+  "sorted_by": "ranking.score",
+  "data_source": "mock"
 }
 ```
 
-## Interpreter modes
+If one ticker fetch fails, the batch still succeeds and that ticker becomes:
+- `status: "error"`
+- `interpretation.setup_type: "market_data_error"`
+- `interpretation.confidence: 0.0`
+- `ranking.score: 0.0`
 
-Set mode with environment variable:
+## Interpreter configuration
 
-- `INTERPRETER_MODE=mock` (default)
-- `INTERPRETER_MODE=openai`
+- `INTERPRETER_MODE=mock|openai` (default `mock`)
+- `OPENAI_API_KEY` (required for `openai`)
+- `OPENAI_MODEL` (default `gpt-5.4`)
 
-Additional OpenAI settings:
+OpenAI failures fallback to deterministic mock interpretation.
 
-- `OPENAI_API_KEY` (required when `INTERPRETER_MODE=openai`)
-- `OPENAI_MODEL` (optional, default: `gpt-5.4`)
+## Market data configuration
 
-### Fallback behavior
+- `MARKET_DATA_MODE=mock|provider` (default `mock`)
+- `MARKET_DATA_API_KEY` (optional scaffold placeholder)
+- `MARKET_DATA_PROVIDER_NAME` (optional scaffold placeholder)
 
-If `INTERPRETER_MODE=openai` and any OpenAI call fails (API error, malformed output, schema mismatch), the service automatically falls back to the deterministic mock interpreter.
+### Mock vs provider behavior
 
-Deterministic facts remain the source of truth in all modes. The model only interprets structured facts. For image-aware interpretation, screenshots are additive context and must not override deterministic signals.
-
-## Ranking logic summary (MVP)
-
-Batch ranking is deterministic and starts from `interpretation.confidence * 100`, then applies fixed adjustments:
-
-- `+10` if action is `buy`
-- `+8` if entry stage is `best`
-- `+4` if entry stage is `early`
-- `-8` if entry stage is `late`
-- `-12` if `reason_flags.major_bc_risk`
-- `-10` if `reason_flags.local_climax_present`
-- `-8` if `conflict_level == high`
-- `+5` for daily/H4 alignment without late H1 ignition
-
-Score is clamped to `0..100` and mapped to priority:
-
-- `high >= 75`
-- `medium >= 55`
-- `low < 55`
-
-## Partial-failure behavior in batch mode
-
-If one ticker fails internally, the batch still succeeds:
-
-- failed item gets `status: "error"`
-- interpretation becomes deterministic error payload:
-  - `action: "wait"`
-  - `setup_type: "analysis_error"`
-  - `confidence: 0.0`
-- ranking becomes low-priority zero score
-- other items are processed normally
+- **mock mode (default, offline-safe):** deterministic candle generation seeded by ticker/timeframe for repeatable tests.
+- **provider mode:** routes through a provider abstraction scaffold. If provider config or adapter is incomplete, per-ticker errors are isolated and do not break whole-batch responses.
 
 ## Installation
 

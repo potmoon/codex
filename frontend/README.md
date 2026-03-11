@@ -25,26 +25,27 @@ Open: `http://localhost:3000`
   - Interpret with Images (`POST /analyze/interpret-with-images`)
 - `/watchlist` Watchlist Analyzer
   - Batch ranking (`POST /analyze/batch-interpret`)
+  - Ticker enrichment batch ranking (`POST /watchlist/enrich-and-batch-interpret`)
   - Two input modes:
-    - **Paste JSON** (existing flow)
-    - **Upload CSV** (frontend-only conversion to existing batch JSON payload)
+    - **Paste JSON** (existing direct-candle flow)
+    - **Upload CSV** (ticker-first flow)
 
 ## CSV upload flow
 
 - Upload a `.csv` file (or paste CSV text) with at least a `ticker` column.
-- CSV rows are parsed client-side.
-- A preview table of parsed rows is shown before submission.
-- Parsed rows are converted into the existing batch request shape expected by `POST /analyze/batch-interpret`.
+- CSV rows are parsed client-side and previewed before submit.
+- Then choose one of two execution paths:
+  1. **Use placeholder candles** (frontend mock candles, current developer convenience path)
+  2. **Enrich from backend by ticker** (backend fetches candles via mock/provider market-data mode)
 
 ### Supported columns (minimum)
 
 - `ticker` (required)
 
-### Current limitation
+### Current limitations
 
-Real candle/market-data enrichment from tickers is **not automated yet**.
-
-For development/testing, CSV rows are mapped to temporary mock candles using configurable placeholder settings (base price + per-row step). This will be replaced later by real data enrichment.
+- Real provider-backed candle enrichment depends on backend market-data provider mode/config.
+- Placeholder candle mode remains for development/testing and is not real market data.
 
 ## Notes
 
