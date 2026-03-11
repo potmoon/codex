@@ -17,6 +17,11 @@ export default function HomePage() {
           <p className="mb-3 text-sm text-slate-300">Submit batch payload and review ranked watchlist output.</p>
           <Link className="text-blue-400 underline" href="/watchlist">Open watchlist analyzer</Link>
         </Card>
+        <Card>
+          <h2 className="mb-2 text-lg font-semibold">Sessions</h2>
+          <p className="mb-3 text-sm text-slate-300">Browse, reopen, and compare saved runs.</p>
+          <Link className="text-blue-400 underline" href="/sessions">Open sessions</Link>
+        </Card>
       </div>
     </div>
   );

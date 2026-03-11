@@ -147,3 +147,33 @@ export type EnrichAndBatchInterpretRequest = {
 export type EnrichAndBatchInterpretResponse = BatchInterpretResponse & {
   data_source: "mock" | "provider";
 };
+
+
+export type SessionSummary = {
+  id: string;
+  created_at: string;
+  session_type: "single_ticker_analysis" | "watchlist_batch_analysis";
+  label?: string | null;
+  ticker?: string | null;
+};
+
+export type SessionDetail = {
+  id: string;
+  created_at: string;
+  session_type: "single_ticker_analysis" | "watchlist_batch_analysis";
+  label?: string | null;
+  ticker?: string | null;
+  request_payload: Record<string, unknown>;
+  facts_payload: Record<string, unknown>;
+  llm_payload: Record<string, unknown>;
+  interpretation_payload: Record<string, unknown>;
+  ranking_payload: Record<string, unknown> | null;
+  metadata: Record<string, unknown>;
+};
+
+export type SessionCompareResponse = {
+  left_id: string;
+  right_id: string;
+  ticker?: string | null;
+  changes: Record<string, unknown>;
+};

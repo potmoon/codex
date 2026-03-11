@@ -1,12 +1,10 @@
 # Frontend Dashboard (Next.js)
 
-Internal operator dashboard for the Chart Analyzer backend.
+## Required env
 
-## Required environment variable
+- `NEXT_PUBLIC_API_BASE_URL` (e.g. `http://localhost:8000`)
 
-- `NEXT_PUBLIC_API_BASE_URL` (example: `http://localhost:8000`)
-
-## Run locally
+## Run
 
 ```bash
 cd frontend
@@ -14,41 +12,28 @@ npm install
 npm run dev
 ```
 
-Open: `http://localhost:3000`
-
 ## Pages
 
-- `/` Home dashboard links
-- `/single` Single Ticker Analyzer
-  - Analyze (`POST /analyze`)
-  - Interpret (`POST /analyze/interpret`)
-  - Interpret with Images (`POST /analyze/interpret-with-images`)
-- `/watchlist` Watchlist Analyzer
-  - Batch ranking (`POST /analyze/batch-interpret`)
-  - Ticker enrichment batch ranking (`POST /watchlist/enrich-and-batch-interpret`)
-  - Two input modes:
-    - **Paste JSON** (existing direct-candle flow)
-    - **Upload CSV** (ticker-first flow)
+- `/` home
+- `/single` single ticker analyze/interpret/image-interpret
+- `/watchlist` watchlist batch analyze (JSON), CSV placeholder mode, CSV ticker-enrichment mode
+- `/sessions` browse/open/compare saved sessions
 
-## CSV upload flow
+## Session features
 
-- Upload a `.csv` file (or paste CSV text) with at least a `ticker` column.
-- CSV rows are parsed client-side and previewed before submit.
-- Then choose one of two execution paths:
-  1. **Use placeholder candles** (frontend mock candles, current developer convenience path)
-  2. **Enrich from backend by ticker** (backend fetches candles via mock/provider market-data mode)
+- Save single interpretation result
+- Save batch/watchlist result
+- Browse recent sessions
+- Open session detail
+- Compare two saved sessions
 
-### Supported columns (minimum)
+## CSV + enrichment
 
-- `ticker` (required)
+- CSV minimum column: `ticker`
+- Mode 1: placeholder candles (frontend mock candles)
+- Mode 2: backend enrich by ticker (`POST /watchlist/enrich-and-batch-interpret`)
 
-### Current limitations
+## Limitations
 
-- Real provider-backed candle enrichment depends on backend market-data provider mode/config.
-- Placeholder candle mode remains for development/testing and is not real market data.
-
-## Notes
-
-- UI intentionally minimal and operator-focused.
-- No auth, no persistence, no chart rendering yet.
-- Frontend consumes backend contracts as-is.
+- No auth, no persistence sync, no realtime.
+- Provider enrichment quality depends on backend market-data mode/config.

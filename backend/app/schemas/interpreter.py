@@ -104,3 +104,50 @@ class EnrichAndBatchInterpretRequest(BaseModel):
 
 class EnrichAndBatchInterpretResponse(BatchInterpretResponse):
     data_source: Literal["mock", "provider"]
+
+
+class SaveSingleSessionRequest(BaseModel):
+    label: str | None = None
+    payload: AnalyzeInterpretResponse
+
+
+class SaveBatchSessionRequest(BaseModel):
+    label: str | None = None
+    payload: BatchInterpretResponse
+
+
+class SessionSummary(BaseModel):
+    id: str
+    created_at: str
+    session_type: Literal["single_ticker_analysis", "watchlist_batch_analysis"]
+    label: str | None
+    ticker: str | None
+
+
+class SessionDetail(BaseModel):
+    id: str
+    created_at: str
+    session_type: Literal["single_ticker_analysis", "watchlist_batch_analysis"]
+    label: str | None
+    ticker: str | None
+    request_payload: dict[str, Any]
+    facts_payload: dict[str, Any]
+    llm_payload: dict[str, Any]
+    interpretation_payload: dict[str, Any]
+    ranking_payload: dict[str, Any] | None
+    metadata: dict[str, Any]
+
+
+class SessionSaveResponse(BaseModel):
+    id: str
+
+
+class SessionsListResponse(BaseModel):
+    items: list[SessionSummary]
+
+
+class SessionCompareResponse(BaseModel):
+    left_id: str
+    right_id: str
+    ticker: str | None = None
+    changes: dict[str, Any]

@@ -1,89 +1,99 @@
-# Codex Backend (Deterministic Facts + Interpreters)
+# Codex Backend
 
-This backend keeps deterministic analysis as the source of truth and adds interpretation, market-data enrichment, and watchlist ranking layers.
+Deterministic analysis is the source of truth. Interpretation, ranking, market-data enrichment, and session persistence are additive layers.
 
-## Endpoints
+## Core endpoints (unchanged contracts)
 
-### `POST /analyze`
-Returns full deterministic analysis facts from candle input.
+- `POST /analyze`
+- `POST /analyze/llm-payload`
+- `POST /analyze/interpret`
+- `POST /analyze/interpret-with-images`
+- `POST /analyze/batch-interpret`
+- `POST /watchlist/enrich-and-batch-interpret`
 
-### `POST /analyze/llm-payload`
-Runs deterministic analysis, then returns a compact LLM-ready facts payload.
+## New session endpoints
 
-### `POST /analyze/interpret`
-Runs single-ticker deterministic analyze → payload → interpret.
+- `POST /sessions/save-single`
+- `POST /sessions/save-batch`
+- `GET /sessions`
+- `GET /sessions/{session_id}`
+- `GET /sessions/compare?left_id=...&right_id=...`
 
-### `POST /analyze/interpret-with-images`
-Image-aware single-ticker interpretation (multipart upload) where images are additive context only.
-
-### `POST /analyze/batch-interpret`
-Runs analyze/payload/interpret/ranking for explicitly provided candles per ticker.
-
-### `POST /watchlist/enrich-and-batch-interpret`
-Fetches candles by ticker (mock/provider), then runs analyze/payload/interpret/ranking.
-
-Request:
+### Save single example
 ```json
 {
-  "tickers": ["WIMI", "FSCO", "BATL", "SMX"],
-  "limits": {
-    "daily": 120,
-    "h4": 120,
-    "h1": 120
+  "label": "WIMI morning run",
+  "payload": {
+    "ticker": "WIMI",
+    "facts": {},
+    "llm_payload": {},
+    "interpretation": {}
   }
 }
 ```
 
-Response:
+### Save batch example
 ```json
 {
-  "count": 4,
-  "items": [
-    {
-      "ticker": "WIMI",
-      "status": "ok",
-      "facts": {},
-      "llm_payload": {},
-      "interpretation": {},
-      "ranking": {
-        "score": 82.0,
-        "priority": "high",
-        "reason": "Best buy alignment across daily and H4"
-      }
-    }
-  ],
-  "sorted_by": "ranking.score",
-  "data_source": "mock"
+  "label": "watchlist close",
+  "payload": {
+    "count": 2,
+    "items": [],
+    "sorted_by": "ranking.score"
+  }
 }
 ```
 
-If one ticker fetch fails, the batch still succeeds and that ticker becomes:
-- `status: "error"`
-- `interpretation.setup_type: "market_data_error"`
-- `interpretation.confidence: 0.0`
-- `ranking.score: 0.0`
+### List response example
+```json
+{
+  "items": [
+    {
+      "id": "...",
+      "created_at": "2026-03-11T00:00:00+00:00",
+      "session_type": "single_ticker_analysis",
+      "label": "WIMI morning run",
+      "ticker": "WIMI"
+    }
+  ]
+}
+```
 
-## Interpreter configuration
+### Compare response example
+```json
+{
+  "left_id": "...",
+  "right_id": "...",
+  "ticker": "WIMI",
+  "changes": {
+    "action_changed": true,
+    "entry_stage_changed": true,
+    "confidence_delta": -0.12,
+    "ranking_score_delta": null,
+    "reason_flag_changes": {},
+    "level_changes": {},
+    "summary": "Moved from best to late."
+  }
+}
+```
+
+## Storage design (SQLite MVP)
+
+- SQLite-backed local persistence via `backend/app/db/sessions.db` by default.
+- Single table `sessions` stores full JSON blobs (`request/facts/llm/interpretation/ranking/metadata`).
+- For watchlist sessions, per-item rows are stored in `metadata.items` JSON blob (simple schema-first MVP).
+
+## Environment
 
 - `INTERPRETER_MODE=mock|openai` (default `mock`)
-- `OPENAI_API_KEY` (required for `openai`)
+- `OPENAI_API_KEY` (required for openai mode)
 - `OPENAI_MODEL` (default `gpt-5.4`)
-
-OpenAI failures fallback to deterministic mock interpretation.
-
-## Market data configuration
-
 - `MARKET_DATA_MODE=mock|provider` (default `mock`)
-- `MARKET_DATA_API_KEY` (optional scaffold placeholder)
-- `MARKET_DATA_PROVIDER_NAME` (optional scaffold placeholder)
+- `MARKET_DATA_API_KEY` (provider scaffold placeholder)
+- `MARKET_DATA_PROVIDER_NAME` (provider scaffold placeholder)
+- `SESSION_DB_PATH` (optional, default `backend/app/db/sessions.db`)
 
-### Mock vs provider behavior
+## Notes
 
-- **mock mode (default, offline-safe):** deterministic candle generation seeded by ticker/timeframe for repeatable tests.
-- **provider mode:** routes through a provider abstraction scaffold. If provider config or adapter is incomplete, per-ticker errors are isolated and do not break whole-batch responses.
-
-## Installation
-
-```bash
-pip install -r requirements.txt
-```
+- No auth, no multi-user support, no background jobs.
+- Provider mode remains scaffolded if external vendor is not configured.
