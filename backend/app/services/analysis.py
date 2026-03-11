@@ -106,6 +106,10 @@ def analyze_ticker(analysis_input: dict[str, Any]) -> dict[str, Any]:
         action = "wait"
         entry_stage = "late"
         conflict_level = "high"
+    elif h4_setup_active and not prior_entry_likely_happened and not major_bc_risk and 0.0 <= h1_dist <= 2.5:
+        action = "buy"
+        entry_stage = "best"
+        conflict_level = "low"
     elif h4_setup_active and not prior_entry_likely_happened and not major_bc_risk:
         action = "watch"
         entry_stage = "trigger"

@@ -4,22 +4,58 @@
     "ticker": "WIMI",
     "candles": {
       "daily": [
-        {"timestamp": "2026-01-01", "open": 9.6, "high": 10.0, "low": 9.3, "close": 9.8},
-        {"timestamp": "2026-01-02", "open": 9.9, "high": 10.3, "low": 9.7, "close": 10.2}
+        {
+          "timestamp": "2026-01-01",
+          "open": 9.6,
+          "high": 10.0,
+          "low": 9.3,
+          "close": 9.8
+        },
+        {
+          "timestamp": "2026-01-02",
+          "open": 9.9,
+          "high": 10.3,
+          "low": 9.7,
+          "close": 10.2
+        }
       ],
       "h4": [
-        {"timestamp": "2026-01-02T00:00", "open": 10.0, "high": 10.2, "low": 9.8, "close": 10.0},
-        {"timestamp": "2026-01-02T04:00", "open": 10.0, "high": 10.25, "low": 9.95, "close": 10.22}
+        {
+          "timestamp": "2026-01-02T00:00",
+          "open": 10.0,
+          "high": 10.2,
+          "low": 9.8,
+          "close": 10.0
+        },
+        {
+          "timestamp": "2026-01-02T04:00",
+          "open": 10.0,
+          "high": 10.25,
+          "low": 9.95,
+          "close": 10.22
+        }
       ],
       "h1": [
-        {"timestamp": "2026-01-02T04:00", "open": 10.15, "high": 10.21, "low": 10.12, "close": 10.19},
-        {"timestamp": "2026-01-02T05:00", "open": 10.18, "high": 10.23, "low": 10.14, "close": 10.22}
+        {
+          "timestamp": "2026-01-02T04:00",
+          "open": 10.15,
+          "high": 10.21,
+          "low": 10.12,
+          "close": 10.19
+        },
+        {
+          "timestamp": "2026-01-02T05:00",
+          "open": 10.18,
+          "high": 10.23,
+          "low": 10.14,
+          "close": 10.22
+        }
       ]
     }
   },
   "expected": {
-    "action": "watch",
-    "entry_stage": "trigger",
+    "action": "buy",
+    "entry_stage": "best",
     "reason_flags": {
       "daily_allows_long": true,
       "h4_setup_active": true,
