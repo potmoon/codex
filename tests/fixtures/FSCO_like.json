@@ -1,0 +1,30 @@
+{
+  "name": "FSCO_like",
+  "input": {
+    "ticker": "FSCO",
+    "candles": {
+      "daily": [
+        {"timestamp": "2026-01-01", "open": 5.9, "high": 6.0, "low": 5.5, "close": 5.8},
+        {"timestamp": "2026-01-02", "open": 5.8, "high": 5.9, "low": 5.2, "close": 5.4}
+      ],
+      "h4": [
+        {"timestamp": "2026-01-02T00:00", "open": 5.4, "high": 5.5, "low": 5.3, "close": 5.35},
+        {"timestamp": "2026-01-02T04:00", "open": 5.35, "high": 5.45, "low": 5.2, "close": 5.25}
+      ],
+      "h1": [
+        {"timestamp": "2026-01-02T04:00", "open": 5.28, "high": 5.3, "low": 5.2, "close": 5.22},
+        {"timestamp": "2026-01-02T05:00", "open": 5.22, "high": 5.25, "low": 5.15, "close": 5.18}
+      ]
+    }
+  },
+  "expected": {
+    "action": "wait",
+    "entry_stage": "late",
+    "reason_flags": {
+      "daily_allows_long": false,
+      "h4_setup_active": false,
+      "major_bc_risk": false,
+      "prior_entry_likely_happened": false
+    }
+  }
+}

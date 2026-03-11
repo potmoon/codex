@@ -1,0 +1,66 @@
+{
+  "name": "SMX_like",
+  "input": {
+    "ticker": "SMX",
+    "candles": {
+      "daily": [
+        {
+          "timestamp": "2026-01-01",
+          "open": 1.9,
+          "high": 2.0,
+          "low": 1.8,
+          "close": 1.99
+        },
+        {
+          "timestamp": "2026-01-02",
+          "open": 1.99,
+          "high": 2.02,
+          "low": 1.95,
+          "close": 2.01
+        }
+      ],
+      "h4": [
+        {
+          "timestamp": "2026-01-02T00:00",
+          "open": 2.0,
+          "high": 2.02,
+          "low": 1.99,
+          "close": 2.0
+        },
+        {
+          "timestamp": "2026-01-02T04:00",
+          "open": 2.0,
+          "high": 2.35,
+          "low": 1.99,
+          "close": 2.25
+        }
+      ],
+      "h1": [
+        {
+          "timestamp": "2026-01-02T04:00",
+          "open": 2.2,
+          "high": 2.3,
+          "low": 2.15,
+          "close": 2.28
+        },
+        {
+          "timestamp": "2026-01-02T05:00",
+          "open": 2.28,
+          "high": 2.32,
+          "low": 2.2,
+          "close": 2.3
+        }
+      ]
+    }
+  },
+  "expected": {
+    "action": "wait",
+    "entry_stage": "setup",
+    "reason_flags": {
+      "daily_allows_long": true,
+      "h4_setup_active": false,
+      "major_bc_risk": true,
+      "prior_entry_likely_happened": false
+    }
+  }
+}
